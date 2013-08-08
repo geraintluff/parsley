@@ -1,0 +1,119 @@
+<html>
+	<head>
+		<title>Test page</title>
+		<script src="parse.js"></script>
+		<style>
+			body {
+				font-size: 0.9em;
+				font-family: Verdana, sans-serif;
+			}
+			
+			.debug-line, .debug-error {
+				white-space: pre;
+				border: 1px solid #BBB;
+				border-radius: 3px;
+				margin: 2px;
+				padding: 3px;
+				background-color: #F0F4F8;
+				color: #222;
+			}
+			
+			.debug-error {
+				background-color: #FAF2F0;
+				color: #B00;
+			}
+			
+			#code {
+				width: 100%;
+				height: 10em;
+			}
+			
+			#parse-button {
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+<textarea id="code">
+(
+	(a, b),
+	c,
+	d,
+	e
+)
+</textarea>
+		<br>
+		<input id="parse-button" type="button" value="parse" onclick="attemptParse();"></input>
+		
+		<pre id="output"></pre>
+		<hr>
+		<div id="debug"></div>
+		<script src="javascript.js"></script>
+		<script id="code">
+			var output = document.getElementById('output');
+			var debug = document.getElementById('debug');
+			var jsParser = Parser("Actual Token").option(parsers.Token).option(parsers.DivPunctuator).option(parsers.RegularExpressionLiteral);
+			
+			function escapeHtml(string) {
+				return ("" + string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			}
+
+			function debugLog(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-line";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+
+			function debugError(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-error";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+			
+			function attemptParse() {
+				var codeText = document.getElementById('code').value;
+				debug.innerHTML = "";
+				debugLog(codeText);
+
+				try {
+					parsed = jsParser.parse(codeText);
+					console.log(parsed.failure);
+
+					output.innerHTML = escapeHtml(JSON.stringify(parsed.result, null, 4));
+					
+					output.innerHTML += "\n\n<I>\n" + escapeHtml(codeText.substring(0, parsed.result.length)) + '</I>';
+					if (parsed.failure) {
+						if (parsed.failure.position > parsed.result.length) {
+							output.innerHTML += '<span style="color: #008">'
+								+ escapeHtml(codeText.substring(parsed.result.length, parsed.failure.position))
+								+ '</span>';
+						} else {
+							output.innerHTML += '<br>';
+						}
+						output.innerHTML += '<span style="color: #B20">'
+							+ escapeHtml(codeText.substring(parsed.failure.position, parsed.failure.position + 10))
+							+ '<B> - expected ' + escapeHtml(parsed.failure.expected.join(", ")) + '</span></B>';
+					}
+				} catch (e) {
+					window.e = e;
+					debugError(e.toString() + "\n\t" + (e.stack || '').replace(/\n/g, '\n\t'));
+					throw e;
+				}
+			}
+			
+			setInterval(function () {
+				attemptParse();
+			}, 100);
+		</script>
+	</body>
+</html>

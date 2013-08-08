@@ -1,0 +1,135 @@
+<html>
+	<head>
+		<title>Test page</title>
+		<script src="parse.js"></script>
+		<style>
+			body {
+				font-size: 0.9em;
+				font-family: Verdana, sans-serif;
+			}
+			
+			.debug-line, .debug-error {
+				white-space: pre;
+				border: 1px solid #BBB;
+				border-radius: 3px;
+				margin: 2px;
+				padding: 3px;
+				background-color: #F0F4F8;
+				color: #222;
+			}
+			
+			.debug-error {
+				background-color: #FAF2F0;
+				color: #B00;
+			}
+			
+			#code {
+				width: 100%;
+				height: 10em;
+			}
+			
+			#parse-button {
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+<textarea id="code">
+(
+	(a, b),
+	c,
+	d,
+	e
+)
+</textarea>
+		<br>
+		<input id="parse-button" type="button" value="parse" onclick="attemptParse();"></input>
+		
+		<pre id="output"></pre>
+		<hr>
+		<div id="debug"></div>
+		<script id="code">
+			var output = document.getElementById('output');
+			var debug = document.getElementById('debug');
+			
+			function escapeHtml(string) {
+				return ("" + string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			}
+
+			function debugLog(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-line";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+
+			function debugError(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-error";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+			
+			function attemptParse() {
+				var codeText = document.getElementById('code').value;
+				debug.innerHTML = "";
+				debugLog(codeText);
+
+				try {
+					result = testParser.parse(codeText);
+
+					output.innerHTML = escapeHtml(JSON.stringify(result, null, 4));
+					output.innerHTML += "\n\nRemainder:<I>\n" + escapeHtml(result.remainder) + '</I>';
+				} catch (e) {
+					window.e = e;
+					debugError(e.toString() + "\n\t" + (e.stack || '').replace(/\n/g, '\n\t'));
+					throw e;
+				}
+			}
+			
+			setInterval(function () {
+				attemptParse();
+			}, 100);
+
+			/*************************/
+
+			Parser.extend({
+				padded: function () {
+					var result = Parser.sequence(/^\s*/, this, /^\s*/).replace(1);
+					this.padded = function () {
+						return result;
+					};
+					return result;
+				}
+			});
+
+			var testParser = new Parser('Test parser');
+			var expressionInner = new Parser('Expression');
+			var expression = new Parser('Expression').option(expressionInner).replace().padded();
+			testParser.option(expression).replace();
+
+			var brackets = new Parser('Brackets');
+			var items = new Parser('Bracket items');
+			items.option(expression).replace([0]);
+			items.option(expression, ",", items).replace(function () {
+				return (this.sequence.length == 3) ? [this.sequence[0]].concat(this.sequence[2]) : this;
+			});
+			brackets.option("(", items, ")").replace(1);
+
+			expressionInner.option(brackets).butNot(brackets.padded(), ",", brackets.padded()).replace();
+			expressionInner.option(/^[a-zA-Z]/).replace();
+			
+			console.log(testParser);
+			console.log(brackets);
+			console.log(items);
+		</script>
+	</body>
+</html>

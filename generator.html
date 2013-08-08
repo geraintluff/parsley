@@ -1,0 +1,448 @@
+<html>
+	<head>
+		<title>Test page</title>
+		<script src="parse.js"></script>
+		<style>
+			body {
+				font-size: 0.9em;
+				font-family: Verdana, sans-serif;
+			}
+			
+			.debug-line, .debug-error {
+				white-space: pre;
+				border: 1px solid #BBB;
+				border-radius: 3px;
+				margin: 2px;
+				padding: 3px;
+				background-color: #F0F4F8;
+				color: #222;
+			}
+			
+			.debug-error {
+				background-color: #FAF2F0;
+				color: #B00;
+			}
+			
+			#code {
+				width: 100%;
+				height: 10em;
+			}
+			
+			#parse-button {
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+<textarea id="code">
+SourceCharacter ::
+any Unicode code unit
+See clause 7
+InputElementDiv ::
+WhiteSpace
+LineTerminator
+Comment
+Token
+DivPunctuator
+See clause 7
+InputElementRegExp ::
+WhiteSpace
+LineTerminator
+Comment
+Token
+RegularExpressionLiteral
+See 7.2
+WhiteSpace ::
+&lt;TAB&gt;
+&lt;VT&gt;
+&lt;FF&gt;
+&lt;SP&gt;
+&lt;NBSP&gt;
+&lt;BOM&gt;
+&lt;USP&gt;
+See 7.3
+LineTerminator ::
+&lt;LF&gt;
+&lt;CR&gt;
+&lt;LS&gt;
+&lt;PS&gt;
+See 7.3
+LineTerminatorSequence ::
+&lt;LF&gt;
+&lt;CR&gt; [lookahead âˆ‰ &lt;LF&gt; ]
+&lt;LS&gt;
+&lt;PS&gt;
+&lt;CR&gt; &lt;LF&gt;
+See 7.4
+Comment ::
+MultiLineComment
+SingleLineComment
+See 7.4
+MultiLineComment ::
+/* MultiLineCommentCharsopt */
+See 7.4
+MultiLineCommentChars ::
+MultiLineNotAsteriskChar MultiLineCommentCharsopt
+* PostAsteriskCommentCharsopt
+See 7.4
+PostAsteriskCommentChars ::
+MultiLineNotForwardSlashOrAsteriskChar MultiLineCommentCharsopt
+* PostAsteriskCommentCharsopt
+See 7.4
+MultiLineNotAsteriskChar ::
+SourceCharacter but not *
+See 7.4
+MultiLineNotForwardSlashOrAsteriskChar ::
+SourceCharacter but not one of / or *
+See 7.4
+SingleLineComment ::
+// SingleLineCommentCharsopt
+See 7.4
+SingleLineCommentChars ::
+SingleLineCommentChar SingleLineCommentCharsopt
+See 7.4
+SingleLineCommentChar ::
+SourceCharacter but not LineTerminator
+See 7.5
+Token ::
+IdentifierName
+Punctuator
+NumericLiteral
+StringLiteral
+See 7.6
+Identifier ::
+IdentifierName but not ReservedWord
+See 7.6
+IdentifierName ::
+IdentifierStart
+IdentifierName IdentifierPart
+See 7.6
+IdentifierStart ::
+UnicodeLetter
+$
+_
+\ UnicodeEscapeSequence
+See 7.6
+IdentifierPart ::
+IdentifierStart
+UnicodeCombiningMark
+UnicodeDigit
+UnicodeConnectorPunctuation
+&lt;ZWNJ&gt;
+&lt;ZWJ&gt;
+See 7.6
+UnicodeLetter ::
+any character in the Unicode categories â€œUppercase letter (Lu)â€, â€œLowercase letter (Ll)â€, â€œTitlecase letter (Lt)â€, â€œModifier letter (Lm)â€, â€œOther letter (Lo)â€, or â€œLetter number (Nl)â€.
+See 7.6
+UnicodeCombiningMark ::
+any character in the Unicode categories â€œNon-spacing mark (Mn)â€ or â€œCombining spacing mark (Mc)â€
+See 7.6
+UnicodeDigit ::
+any character in the Unicode category â€œDecimal number (Nd)â€
+See 7.6
+UnicodeConnectorPunctuation ::
+any character in the Unicode category â€œConnector punctuation (Pc)â€
+See 7.6.1
+ReservedWord ::
+Keyword
+FutureReservedWord
+NullLiteral
+BooleanLiteral
+See 7.6.1.1
+Keyword :: one of
+break	do	instanceof	typeof
+case	else	new	var
+catch	finally	return	void
+continue	for	switch	while
+debugger	function	this	with
+default	if	throw	
+delete	in	try	
+See 7.6.1.2
+FutureReservedWord :: one of
+class	enum	extends	super
+const	export	import
+The following tokens are also considered to be FutureReservedWords when parsing strict mode code (see 10.1.1).
+
+implements	let	private	public
+interface	package	protected	static
+yield			
+See 7.7
+Punctuator :: one of
+{	}	(	)	[	]
+.	;	,	&lt;	&gt;	&lt;=
+&gt;=	==	!=	===	!==	
++	-	*	%	++	--
+&lt;&lt;	&gt;&gt;	&gt;&gt;&gt;	&amp;	|	^
+!	~	&amp;&amp;	||	?	:
+=	+=	-=	*=	%=	&lt;&lt;=
+&gt;&gt;=	&gt;&gt;&gt;=	&amp;=	|=	^=	
+See 7.7
+DivPunctuator :: one of
+/	/=				
+See 7.8
+Literal ::
+NullLiteral
+BooleanLiteral
+NumericLiteral
+StringLiteral
+RegularExpressionLiteral
+See 7.8.1
+NullLiteral ::
+null
+See 7.8.2
+BooleanLiteral ::
+true
+false
+See 7.8.3
+NumericLiteral ::
+DecimalLiteral
+HexIntegerLiteral
+See 7.8.3
+DecimalLiteral ::
+DecimalIntegerLiteral . DecimalDigitsopt ExponentPartopt
+. DecimalDigits ExponentPartopt
+DecimalIntegerLiteral ExponentPartopt
+See 7.8.3
+DecimalIntegerLiteral ::
+0
+NonZeroDigit DecimalDigitsopt
+See 7.8.3
+DecimalDigits ::
+DecimalDigit
+DecimalDigits DecimalDigit
+See 7.8.3
+DecimalDigit :: one of
+0 1 2 3 4 5 6 7 8 9
+See 7.8.3
+NonZeroDigit :: one of
+1 2 3 4 5 6 7 8 9
+See 7.8.3
+ExponentPart ::
+ExponentIndicator SignedInteger
+See 7.8.3
+ExponentIndicator :: one of
+e E
+See 7.8.3
+SignedInteger ::
+DecimalDigits
++ DecimalDigits
+- DecimalDigits
+See 7.8.3
+HexIntegerLiteral ::
+0x HexDigit
+0X HexDigit
+HexIntegerLiteral HexDigit
+See 7.8.3
+HexDigit :: one of
+0 1 2 3 4 5 6 7 8 9 a b c d e f A B C D E F
+See 7.8.4
+StringLiteral ::
+" DoubleStringCharactersopt "
+' SingleStringCharactersopt '
+See 7.8.4
+DoubleStringCharacters ::
+DoubleStringCharacter DoubleStringCharactersopt
+See 7.8.4
+SingleStringCharacters ::
+SingleStringCharacter SingleStringCharactersopt
+See 7.8.4
+DoubleStringCharacter ::
+SourceCharacter but not one of " or \ or LineTerminator
+\ EscapeSequence
+LineContinuation
+See 7.8.4
+SingleStringCharacter ::
+SourceCharacter but not one of ' or \ or LineTerminator
+\ EscapeSequence
+LineContinuation
+See 7.8.4
+LineContinuation ::
+\ LineTerminatorSequence
+See 7.8.4
+EscapeSequence ::
+CharacterEscapeSequence
+0 [lookahead âˆ‰ DecimalDigit]
+HexEscapeSequence
+UnicodeEscapeSequence
+See 7.8.4
+CharacterEscapeSequence ::
+SingleEscapeCharacter
+NonEscapeCharacter
+See 7.8.4
+SingleEscapeCharacter :: one of
+' " \ b f n r t v
+See 7.8.4
+NonEscapeCharacter ::
+SourceCharacter but not one of EscapeCharacter or LineTerminator
+See 7.8.4
+EscapeCharacter ::
+SingleEscapeCharacter
+DecimalDigit
+x
+u
+See 7.8.4
+HexEscapeSequence ::
+x HexDigit HexDigit
+See 7.8.4
+UnicodeEscapeSequence ::
+u HexDigit HexDigit HexDigit HexDigit
+See 7.8.5
+RegularExpressionLiteral ::
+/ RegularExpressionBody / RegularExpressionFlags
+See 7.8.5
+RegularExpressionBody ::
+RegularExpressionFirstChar RegularExpressionChars
+See 7.8.5
+RegularExpressionChars ::
+[empty]
+RegularExpressionChars RegularExpressionChar
+See 7.8.5
+RegularExpressionFirstChar ::
+RegularExpressionNonTerminator but not one of * or \ or / or [
+RegularExpressionBackslashSequence
+RegularExpressionClass
+See 7.8.5
+RegularExpressionChar ::
+RegularExpressionNonTerminator but not \ or / or [
+RegularExpressionBackslashSequence
+RegularExpressionClass
+See 7.8.5
+RegularExpressionBackslashSequence ::
+\ RegularExpressionNonTerminator
+See 7.8.5
+RegularExpressionNonTerminator ::
+SourceCharacter but not LineTerminator
+See 7.8.5
+RegularExpressionClass ::
+[ RegularExpressionClassChars ]
+See 7.8.5
+RegularExpressionClassChars ::
+[empty]
+RegularExpressionClassChars RegularExpressionClassChar
+See 7.8.5
+RegularExpressionClassChar ::
+RegularExpressionNonTerminator but not ] or \
+RegularExpressionBackslashSequence
+See 7.8.5
+RegularExpressionFlags ::
+[empty]
+RegularExpressionFlags IdentifierPart
+</textarea>
+		<br>
+		<input id="parse-button" type="button" value="parse" onclick="attemptParse();"></input>
+		
+		<pre id="output"></pre>
+		<hr>
+		<div id="debug"></div>
+		<script id="code">
+			var output = document.getElementById('output');
+			var debug = document.getElementById('debug');
+			
+			function escapeHtml(string) {
+				return ("" + string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			}
+
+			function debugLog(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-line";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+
+			function debugError(value) {
+				if (typeof value != 'string') {
+					value = JSON.stringify(value, null, 4);
+				}
+				value = value.replace(/^\s*/, '').replace(/\s*$/, '');
+				var line = document.createElement('div');
+				line.className = "debug-error";
+				line.innerHTML = escapeHtml(value);
+				debug.appendChild(line);
+			}
+			
+			setTimeout(function () {
+				var text = document.getElementById('code').value;
+				var jsCode = parseLines(text.split("\n"));
+				document.getElementById('output').innerHTML = escapeHtml(jsCode);
+			}, 100);
+
+			/*************************/
+
+			function parseLines(lines) {
+				var definitions = {};
+				var lastKey = null;
+				for (var i = 0; i < lines.length; i++) {
+					var line = lines[i].replace(/(^\s*|\s*$)/g, "");
+					if (line == "") {
+						continue;
+					}
+					if (/^See /.test(line)) {
+						continue;
+					}
+					var parts = line.split("::");
+					if (parts.length == 1) {
+						definitions[lastKey].lines.push(line.replace(/(^\s*|\s*$)/g, ""));
+					} else {
+						var name = parts.shift().replace(/(^\s*|\s*$)/g, "");
+						definitions[name] = {
+							mod: parts.join("::").replace(/(^\s*|\s*$)/g, ""),
+							lines: []
+						};
+						lastKey = name;
+					}
+				}
+				
+				var jsCode = [
+					"var replaceFunction = function () {return (this.sequence.length == 1) ? this.sequence[0] : this};",
+					"var parsers = {};"
+				];
+				
+				var knownParsers = {}
+
+				for (var name in definitions) {
+					knownParsers[name] = true;
+					knownParsers[name + "opt"] = true;
+					jsCode.push("parsers[" + JSON.stringify(name) + "] = new Parser(" + JSON.stringify(name) + ");");
+					jsCode.push("parsers[" + JSON.stringify(name + "opt") + "] = parsers[" + JSON.stringify(name) + "].optional();");
+				}
+				jsCode.push("");
+
+				for (var name in definitions) {
+					var definition = definitions[name];
+					for (var i = 0; i < definition.lines.length; i++) {
+						var line = definition.lines[i];
+						var parts = line.replace(/\t/g, ' ').split(" ");
+						if (definition.mod == "one of") {
+							var jsLine = "parsers[" + JSON.stringify(name) + "]";
+							for (var j = 0; j < parts.length; j++) {
+								var part = parts[j];
+								jsLine += ".option(" + JSON.stringify(part) + ")";
+							}
+							jsCode.push(jsLine + ";");
+						} else {
+							var jsArgs = [];
+							for (var j = 0; j < parts.length; j++) {
+								var part = parts[j];
+								if (knownParsers[part]) {
+									jsArgs[j] = "parsers[" + JSON.stringify(part) + "]";
+								} else {
+									jsArgs[j] = JSON.stringify(part);
+								}
+							}
+							jsCode.push("parsers[" + JSON.stringify(name) + "].option(" + jsArgs.join(", ") + ");");
+						}
+					}
+					jsCode.push("parsers[" + JSON.stringify(name) + "].replaceAll(replaceFunction);");
+					jsCode.push("");
+				}
+
+				jsCode = jsCode.join("\n");
+				return jsCode;
+			}
+		</script>
+	</body>
+</html>
