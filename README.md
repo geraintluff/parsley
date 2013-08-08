@@ -29,6 +29,14 @@ Here's a parser for an example grammar involving brackets, commas and letters, e
 
 Note the penultimate line where it *disallows* having two bracket clauses next to each other.
 
+You then run the parser like:
+
+```javascript
+	var parsed = expression.parse("((a,b),c,d)");
+	console.log(parsed.result); // the result, after any replacements
+	console.log(parsed.failure); // the parse error that was furthest along in the input
+```
+
 ## Replacement
 
 `.replace()` declares replacement rules for the most recently-created option, and it can take custom functions, indices, arrays of indices, or blank (default replacement behaviour).
