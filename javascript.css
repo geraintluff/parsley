@@ -1,0 +1,19 @@
+.parsley {
+}
+
+.parse-error-code {
+	color: #F00;
+	background-color: #FDD;
+}
+
+.Token, .DivPunctuator, .RegularExpressionLiteral {
+	color: #800;
+}
+
+.RegularExpressionLiteral {
+	font-style: italic;
+}
+
+.RegularExpressionBody {
+	color: #840;
+}

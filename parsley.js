@@ -1,4 +1,4 @@
-var Parser = (function () {
+(function (apiTarget) {
 	function debugLog(value) {
 		(window.debugLog || console.log)(value);
 	}
@@ -240,7 +240,16 @@ var Parser = (function () {
 	function ParserOption(parser, name, index, sequence) {
 		this.id = uniqueId();
 		this.parser = parser;
-		this.name = name || index.toString();
+		if (!name) {
+			if (sequence.length == 1 && typeof sequence[0] == "string") {
+				name = sequence[0];
+			} else if (sequence.length == 1 && sequence[0] instanceof Parser) {
+				name = sequence[0].name;
+			} else {
+				name = index.toString();
+			}
+		}
+		this.name = name;
 		this.immediate = false;
 
 		this.immediateOptions = [];
@@ -479,11 +488,12 @@ var Parser = (function () {
 		}
 	};
 	
+	apiTarget.Parser = Parser;
+	
 	Parser.Result = ParseResult;
 	Parser.extend = function (map) {
 		for (var key in map) {
 			Parser.prototype[key] = Parser.prototype[key] || map[key];
 		}
 	};
-	return Parser;
-})();
+})((typeof module !== 'undefined' && module.exports) ? exports : this);

@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title>Test page</title>
-		<script src="parse.js"></script>
+		<script src="parsley.js"></script>
 		<style>
 			body {
 				font-size: 0.9em;
@@ -32,6 +32,7 @@
 				width: 100%;
 			}
 		</style>
+		<link rel="stylesheet" href="javascript.css"></link>
 	</head>
 	<body>
 <textarea id="code">
@@ -80,6 +81,19 @@
 				debug.appendChild(line);
 			}
 			
+			var resultToHtml = function (parsed) {
+				var result = '<span class="parsley ' + parsed.parser + '">';
+				for (var i = 0; i < parsed.sequence.length; i++) {
+					var item = parsed.sequence[i];
+					if (item && typeof item == "object") {
+						result += resultToHtml(item);
+					} else {
+						result += escapeHtml(item || "");
+					}
+				}
+				return result + '</span>';
+			};
+
 			function attemptParse() {
 				var codeText = document.getElementById('code').value;
 				debug.innerHTML = "";
@@ -87,23 +101,24 @@
 
 				try {
 					parsed = jsParser.parse(codeText);
-					console.log(parsed.failure);
+					//console.log(parsed.failure);
 
-					output.innerHTML = escapeHtml(JSON.stringify(parsed.result, null, 4));
+					output.innerHTML = resultToHtml(parsed.result);
 					
-					output.innerHTML += "\n\n<I>\n" + escapeHtml(codeText.substring(0, parsed.result.length)) + '</I>';
 					if (parsed.failure) {
-						if (parsed.failure.position > parsed.result.length) {
-							output.innerHTML += '<span style="color: #008">'
+						if (parsed.failure.position >= parsed.result.length) {
+							output.innerHTML += '<span style="color: #888">'
 								+ escapeHtml(codeText.substring(parsed.result.length, parsed.failure.position))
 								+ '</span>';
 						} else {
 							output.innerHTML += '<br>';
 						}
-						output.innerHTML += '<span style="color: #B20">'
+						output.innerHTML += '<span class="parse-error"><span class="parse-error-code">'
 							+ escapeHtml(codeText.substring(parsed.failure.position, parsed.failure.position + 10))
-							+ '<B> - expected ' + escapeHtml(parsed.failure.expected.join(", ")) + '</span></B>';
+							+ '</span> - expected ' + escapeHtml(parsed.failure.expected.join(", ")) + '</span>';
 					}
+					output.innerHTML += "\n\n";
+					output.innerHTML += escapeHtml(JSON.stringify(parsed.result, null, 4));
 				} catch (e) {
 					window.e = e;
 					debugError(e.toString() + "\n\t" + (e.stack || '').replace(/\n/g, '\n\t'));

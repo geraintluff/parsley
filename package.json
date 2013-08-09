@@ -1,0 +1,21 @@
+{
+  "name": "parsley",
+  "version": "0.0.0",
+  "description": "Shift-reduce-style configurable parsing engine",
+  "main": "parsley.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geraintluff/parsley.git"
+  },
+  "keywords": [
+    "parse",
+    "parser"
+  ],
+  "author": "Geraint Luff",
+  "license": "http://geraintluff.github.io/tv4/LICENSE.txt",
+  "readmeFilename": "README.md",
+  "gitHead": "bb70ac9a8dfc7bdbbde3e1b92dc0ebae39ae27b8"
+}
